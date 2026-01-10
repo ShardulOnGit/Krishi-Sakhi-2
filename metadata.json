@@ -1,0 +1,9 @@
+{
+  "name": "Copy of Krishi Sakhi",
+  "description": "An AI-Powered Farmer Empowerment Platform helping farmers with smart advisory, disease detection, and community support.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
