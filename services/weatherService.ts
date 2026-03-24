@@ -3,7 +3,7 @@ import { WeatherData } from '../types';
 export const fetchWeatherData = async (lat: number, lon: number): Promise<WeatherData | null> => {
   try {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=7`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&forecast_days=7`
     );
     const data = await response.json();
 
@@ -24,7 +24,15 @@ export const fetchWeatherData = async (lat: number, lon: number): Promise<Weathe
         maxTemp: data.daily.temperature_2m_max[index],
         minTemp: data.daily.temperature_2m_min[index],
         conditionCode: data.daily.weather_code[index],
-        rainProb: data.daily.precipitation_probability_max[index]
+        rainProb: data.daily.precipitation_probability_max[index],
+        sunrise: data.daily.sunrise[index],
+        sunset: data.daily.sunset[index]
+      })),
+      hourly: data.hourly.time.slice(0, 24).map((time: string, index: number) => ({
+        time: time,
+        temp: data.hourly.temperature_2m[index],
+        conditionCode: data.hourly.weather_code[index],
+        rainProb: data.hourly.precipitation_probability[index]
       })),
       location: "Kottayam, Kerala" // Default for now, can be updated with reverse geocoding
     };

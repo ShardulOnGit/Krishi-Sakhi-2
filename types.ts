@@ -30,6 +30,14 @@ export interface WeatherData {
     minTemp: number;
     conditionCode: number;
     rainProb: number;
+    sunrise: string;
+    sunset: string;
+  }>;
+  hourly: Array<{
+    time: string;
+    temp: number;
+    conditionCode: number;
+    rainProb: number;
   }>;
   location: string;
 }
@@ -67,6 +75,13 @@ export interface Scheme {
   benefits: string;
   eligibility: string;
   deadline?: string;
+  link?: string; // Official website link
+}
+
+export interface ApplicationGuide {
+  steps: string[];
+  documents: string[];
+  tips: string;
 }
 
 export interface Quest {

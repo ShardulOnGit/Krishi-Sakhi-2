@@ -84,6 +84,15 @@ export const translations = {
     humidity: 'Humidity',
     forecast_7_days: '7-Day Forecast',
     today: 'Today',
+    hourly_forecast: 'Hourly Forecast',
+    farming_conditions: 'Farming Conditions',
+    spraying: 'Spraying',
+    harvest: 'Harvesting',
+    irrigation: 'Irrigation',
+    suitable: 'Suitable',
+    not_suitable: 'Not Suitable',
+    sunrise: 'Sunrise',
+    sunset: 'Sunset',
 
     // Activities
     activities_title: 'Farm Activities Log',
@@ -163,6 +172,14 @@ export const translations = {
     eligibility: 'Eligibility',
     deadline: 'Deadline',
     match_score_scheme: 'Match',
+    apply_now: 'Apply Now',
+    guide_me: 'Guide Me (AI)',
+    application_guide: 'Application Guide',
+    documents_required: 'Required Documents',
+    step_by_step: 'Step-by-Step Instructions',
+    important_tips: 'Important Tips',
+    generating_guide: 'Generating Guide...',
+    visit_official_site: 'Visit Official Website',
 
     // Quests
     quests_title: 'Sustainability Quests',
@@ -249,6 +266,9 @@ export const translations = {
     soil_ph: 'Soil pH',
     wind_stress: 'Wind Stress',
     ai_generated: 'AI Generated',
+    read_aloud: 'Read Aloud',
+    stop_reading: 'Stop Reading',
+    regenerate: 'Regenerate',
 
     // Animal Mart
     mart_title: 'Farm Animal Marketplace',
@@ -369,6 +389,15 @@ export const translations = {
     humidity: 'नमी',
     forecast_7_days: '7-दिन का पूर्वानुमान',
     today: 'आज',
+    hourly_forecast: 'प्रति घंटा पूर्वानुमान',
+    farming_conditions: 'खेती की स्थिति',
+    spraying: 'छिड़काव',
+    harvest: 'कटाई',
+    irrigation: 'सिंचाई',
+    suitable: 'उपयुक्त',
+    not_suitable: 'अनुपयुक्त',
+    sunrise: 'सूर्योदय',
+    sunset: 'सूर्यास्त',
 
     // Activities
     activities_title: 'कृषि गतिविधि लॉग',
@@ -448,6 +477,14 @@ export const translations = {
     eligibility: 'पात्रता',
     deadline: 'अंतिम तिथि',
     match_score_scheme: 'मैच',
+    apply_now: 'अभी आवेदन करें',
+    guide_me: 'मार्गदर्शन करें (AI)',
+    application_guide: 'आवेदन गाइड',
+    documents_required: 'आवश्यक दस्तावेज',
+    step_by_step: 'चरण-दर-चरण निर्देश',
+    important_tips: 'महत्वपूर्ण सुझाव',
+    generating_guide: 'गाइड बना रहा है...',
+    visit_official_site: 'आधिकारिक वेबसाइट पर जाएं',
 
     // Quests
     quests_title: 'स्थिरता कार्य (Quests)',
@@ -534,6 +571,9 @@ export const translations = {
     soil_ph: 'मिट्टी का पीएच',
     wind_stress: 'हवा का तनाव',
     ai_generated: 'AI जनरेटेड',
+    read_aloud: 'जोर से पढ़ें',
+    stop_reading: 'पढ़ना बंद करें',
+    regenerate: 'पुनः उत्पन्न करें',
 
     // Animal Mart
     mart_title: 'पशु मंडी',
@@ -654,6 +694,15 @@ export const translations = {
     humidity: 'आर्द्रता',
     forecast_7_days: '७-दिवसांचा अंदाज',
     today: 'आज',
+    hourly_forecast: 'तासाचा अंदाज',
+    farming_conditions: 'शेतीची स्थिती',
+    spraying: 'फवारणी',
+    harvest: 'कापणी',
+    irrigation: 'सिंचन',
+    suitable: 'योग्य',
+    not_suitable: 'अयोग्य',
+    sunrise: 'सूर्योदय',
+    sunset: 'सूर्यास्त',
 
     // Activities
     activities_title: 'शेती कामांची नोंद',
@@ -715,7 +764,7 @@ export const translations = {
     complete_profile_msg: 'जगभरातील शेतकऱ्यांशी जुळण्यासाठी कृपया तुमचे प्रोफाइल पूर्ण करा.',
     complete_profile_btn: 'प्रोफाइल पूर्ण करा',
     no_matches: 'सध्या कोणतेही जुळणारे शेतकरी सापडले नाहीत. कृपया नंतर पुन्हा प्रयत्न करा.',
-    not_set: 'सेट नाही',
+    not_set: 'सेट नहीं',
     edit_profile_tooltip: 'प्रोफाइल संपादित करा',
 
     // Schemes
@@ -733,6 +782,14 @@ export const translations = {
     eligibility: 'पात्रता',
     deadline: 'अंतिम मुदत',
     match_score_scheme: 'मॅच',
+    apply_now: 'आता अर्ज करा',
+    guide_me: 'मार्गदर्शन करा (AI)',
+    application_guide: 'अर्ज मार्गदर्शक',
+    documents_required: 'आवश्यक कागदपत्रे',
+    step_by_step: 'चरण-दर-चरण सूचना',
+    important_tips: 'महत्वाच्या टिप्स',
+    generating_guide: 'गाइड तयार करत आहे...',
+    visit_official_site: 'अधिकृत वेबसाइटला भेट द्या',
 
     // Quests
     quests_title: 'शाश्वत उपक्रम (Quests)',
@@ -799,7 +856,7 @@ export const translations = {
     disease_title: 'पीक रोग तपासणी',
     disease_subtitle: 'रोग ओळखण्यासाठी आणि उपचार सल्ला घेण्यासाठी आपल्या पिकाचा फोटो अपलोड करा',
     upload_plant_image: 'पिकाचा फोटो अपलोड करा',
-    click_to_upload: 'अपलोड करण्यासाठी क्लिक करा',
+    click_to_upload: 'अपलोड करण्यासाठी क्लिक करें',
     tips_results: 'चांगल्या परिणामांसाठी टिपा',
     detect_disease: 'रोग शोधा',
     analyzing: 'विश्लेषण करत आहे...',
@@ -819,6 +876,9 @@ export const translations = {
     soil_ph: 'मातीचा pH',
     wind_stress: 'वारा ताण',
     ai_generated: 'AI जनरेटेड',
+    read_aloud: 'मोठ्याने वाचा',
+    stop_reading: 'वाचणे थांबवा',
+    regenerate: 'पुन्हा तयार करा',
 
     // Animal Mart
     mart_title: 'पशु बाजार',

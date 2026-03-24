@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, Droplets, Thermometer, Activity, Leaf, Sprout, CheckCircle, Loader2, Wind } from 'lucide-react';
+import { AlertTriangle, Droplets, Thermometer, Activity, Leaf, Sprout, CheckCircle, Loader2, Wind, Volume2, StopCircle, RefreshCw } from 'lucide-react';
 import { fetchWeatherData } from '../services/weatherService';
 import { generateSmartAdvisory, SmartAdvisoryResponse } from '../services/geminiService';
 import { Crop } from '../types';
@@ -10,43 +10,93 @@ const SmartAdvisory: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [weatherData, setWeatherData] = useState<{temp: number, humidity: number} | null>(null);
     const [advisory, setAdvisory] = useState<SmartAdvisoryResponse | null>(null);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+
+    const loadData = async () => {
+        setLoading(true);
+        // Stop any ongoing speech when reloading
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+
+        try {
+            // 1. Fetch Weather (Defaulting to Kottayam, Kerala for demo)
+            const weather = await fetchWeatherData(9.5916, 76.5222);
+            
+            // 2. Fetch Crops from Local Storage
+            const savedCrops = localStorage.getItem('krishi_crops');
+            const crops: Crop[] = savedCrops ? JSON.parse(savedCrops) : [];
+
+            if (weather) {
+                setWeatherData({
+                    temp: Math.round(weather.current.temp),
+                    humidity: weather.current.humidity
+                });
+
+                // 3. Generate AI Advisory
+                const aiResponse = await generateSmartAdvisory(weather, crops, language);
+                setAdvisory(aiResponse);
+            }
+        } catch (error) {
+            console.error("Failed to load advisory data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // 1. Fetch Weather (Defaulting to Kottayam, Kerala for demo)
-                const weather = await fetchWeatherData(9.5916, 76.5222);
-                
-                // 2. Fetch Crops from Local Storage
-                const savedCrops = localStorage.getItem('krishi_crops');
-                const crops: Crop[] = savedCrops ? JSON.parse(savedCrops) : [];
-
-                if (weather) {
-                    setWeatherData({
-                        temp: Math.round(weather.current.temp),
-                        humidity: weather.current.humidity
-                    });
-
-                    // 3. Generate AI Advisory
-                    const aiResponse = await generateSmartAdvisory(weather, crops, language);
-                    setAdvisory(aiResponse);
-                }
-            } catch (error) {
-                console.error("Failed to load advisory data", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         loadData();
-    }, [language]); // Reload when language changes
+        return () => {
+            // Cleanup speech on unmount
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+        };
+    }, [language]);
+
+    const speakAdvisory = () => {
+        if (!advisory || !window.speechSynthesis) return;
+
+        // Cancel previous utterances
+        window.speechSynthesis.cancel();
+
+        // Construct the text to read based on structure
+        let textToRead = `${t.pest_disease_forecast}. ${advisory.pestForecast.condition}. ${advisory.pestForecast.description}. ${t.recommended_action}: ${advisory.pestForecast.action}. `;
+        
+        if (advisory.cropManagement.length > 0) {
+            textToRead += `${t.crop_management}. `;
+            advisory.cropManagement.forEach(item => {
+                textToRead += `For ${item.cropName}, ${item.advice}. `;
+            });
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        
+        // Map app language code to BCP 47 tag for TTS
+        const langMap: Record<string, string> = {
+            'en': 'en-IN',
+            'hi': 'hi-IN',
+            'mr': 'mr-IN'
+        };
+        utterance.lang = langMap[language] || 'en-IN';
+        utterance.rate = 0.9; // Slightly slower for better clarity
+
+        utterance.onstart = () => setIsSpeaking(true);
+        utterance.onend = () => setIsSpeaking(false);
+        utterance.onerror = () => setIsSpeaking(false);
+
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const stopSpeaking = () => {
+        if (window.speechSynthesis) {
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+        }
+    };
 
     if (loading) {
         return (
             <div className="flex h-96 items-center justify-center flex-col gap-4">
                 <Loader2 className="animate-spin text-green-600" size={40} />
-                <p className="text-gray-500 font-medium animate-pulse">{t.analyzing}</p>
+                <p className="text-gray-500 font-medium animate-pulse">{t.ai_thinking}</p>
             </div>
         );
     }
@@ -58,12 +108,42 @@ const SmartAdvisory: React.FC = () => {
     return (
         <div className="p-4 md:p-8 space-y-8 animate-fade-in max-w-6xl mx-auto">
             {/* Top Header */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    <Sprout className="text-green-600" />
-                    {t.advisory_title}
-                </h2>
-                <p className="text-gray-500">{t.advisory_subtitle}</p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <Sprout className="text-green-600" />
+                        {t.advisory_title}
+                    </h2>
+                    <p className="text-gray-500">{t.advisory_subtitle}</p>
+                </div>
+                
+                <div className="flex gap-2">
+                    {/* TTS Controls */}
+                    {isSpeaking ? (
+                        <button 
+                            onClick={stopSpeaking}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg font-bold hover:bg-red-200 transition-colors animate-pulse"
+                        >
+                            <StopCircle size={18} /> {t.stop_reading}
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={speakAdvisory}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold hover:bg-blue-200 transition-colors"
+                        >
+                            <Volume2 size={18} /> {t.read_aloud}
+                        </button>
+                    )}
+
+                    {/* Regenerate Button */}
+                    <button 
+                        onClick={loadData}
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-colors"
+                        disabled={loading}
+                    >
+                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} /> {t.regenerate}
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

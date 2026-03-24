@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ScrollText, ExternalLink, ChevronRight, Sparkles, Loader2, CheckCircle, Search, X } from 'lucide-react';
-import { Scheme } from '../types';
-import { getSchemeRecommendations, SchemeRecommendation } from '../services/geminiService';
+import { ScrollText, ExternalLink, ChevronRight, Sparkles, Loader2, CheckCircle, Search, X, FileText, CheckSquare, Lightbulb, Link as LinkIcon } from 'lucide-react';
+import { Scheme, ApplicationGuide } from '../types';
+import { getSchemeRecommendations, SchemeRecommendation, generateSchemeApplicationGuide } from '../services/geminiService';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const SCHEMES: Scheme[] = [
@@ -12,7 +12,8 @@ const SCHEMES: Scheme[] = [
         category: 'Financial Support',
         description: 'Direct income support of Rs. 6,000 per year to landholding farmer families, payable in three equal installments of Rs. 2,000 each.',
         benefits: 'Rs. 6000/year',
-        eligibility: 'All landholding farmers with cultivable land.'
+        eligibility: 'All landholding farmers with cultivable land.',
+        link: 'https://pmkisan.gov.in/'
     },
     {
         id: '2',
@@ -22,7 +23,8 @@ const SCHEMES: Scheme[] = [
         description: 'Crop insurance scheme that provides financial support to farmers suffering crop loss/damage arising out of unforeseen events.',
         benefits: 'Insurance coverage against crop failure',
         eligibility: 'Farmers with insurable crops',
-        deadline: '31st July'
+        deadline: '31st July',
+        link: 'https://pmfby.gov.in/'
     },
     {
         id: '3',
@@ -31,7 +33,8 @@ const SCHEMES: Scheme[] = [
         category: 'Development',
         description: 'Aims to achieve self-sufficiency in food production by bringing fallow land under cultivation in Kerala.',
         benefits: 'Subsidy for seeds and fertilizers',
-        eligibility: 'Farmers residing in Kerala'
+        eligibility: 'Farmers residing in Kerala',
+        link: 'https://aims.kerala.gov.in/'
     },
     {
         id: '4',
@@ -40,7 +43,8 @@ const SCHEMES: Scheme[] = [
         category: 'Credit',
         description: 'Provides farmers with adequate and timely credit support from the banking system for their cultivation and other needs.',
         benefits: 'Low interest loans (4% effective rate)',
-        eligibility: 'All farmers, tenant farmers, sharecroppers'
+        eligibility: 'All farmers, tenant farmers, sharecroppers',
+        link: 'https://myscheme.gov.in/schemes/kcc'
     },
     {
         id: '5',
@@ -49,7 +53,8 @@ const SCHEMES: Scheme[] = [
         category: 'Irrigation',
         description: 'Subsidies for installing drip and sprinkler irrigation systems to improve water use efficiency.',
         benefits: 'Up to 55% subsidy on micro-irrigation systems',
-        eligibility: 'Farmers with own land and water source'
+        eligibility: 'Farmers with own land and water source',
+        link: 'https://pmksy.gov.in/'
     },
     {
         id: '6',
@@ -58,7 +63,8 @@ const SCHEMES: Scheme[] = [
         category: 'Advisory',
         description: 'Provides information to farmers on nutrient status of their soil along with recommendation on appropriate dosage of nutrients.',
         benefits: 'Free soil testing and report every 2 years',
-        eligibility: 'All farmers'
+        eligibility: 'All farmers',
+        link: 'https://www.soilhealth.dac.gov.in/'
     }
 ];
 
@@ -69,6 +75,11 @@ const Schemes: React.FC = () => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [recommendations, setRecommendations] = useState<SchemeRecommendation[]>([]);
     
+    // Guide State
+    const [activeGuideScheme, setActiveGuideScheme] = useState<Scheme | null>(null);
+    const [guideData, setGuideData] = useState<ApplicationGuide | null>(null);
+    const [isGuideLoading, setIsGuideLoading] = useState(false);
+
     // User Profile Form State
     const [profile, setProfile] = useState({
         state: 'Kerala',
@@ -83,6 +94,15 @@ const Schemes: React.FC = () => {
         const results = await getSchemeRecommendations(profile, SCHEMES, language);
         setRecommendations(results);
         setIsAnalyzing(false);
+    };
+
+    const handleOpenGuide = async (scheme: Scheme) => {
+        setActiveGuideScheme(scheme);
+        setGuideData(null);
+        setIsGuideLoading(true);
+        const data = await generateSchemeApplicationGuide(scheme.name, language);
+        setGuideData(data);
+        setIsGuideLoading(false);
     };
 
     const getRecommendationDetails = (schemeId: string) => {
@@ -229,9 +249,18 @@ const Schemes: React.FC = () => {
                                 </div>
                             )}
 
-                            <div className="absolute top-6 right-6 text-gray-300 group-hover:text-pink-600 transition-colors">
-                                <ExternalLink size={20} />
-                            </div>
+                            {/* External Link Icon Button */}
+                            {scheme.link && (
+                                <a 
+                                    href={scheme.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="absolute top-6 right-6 text-gray-400 hover:text-pink-600 transition-colors p-2 hover:bg-pink-50 rounded-full"
+                                    title={t.visit_official_site}
+                                >
+                                    <ExternalLink size={20} />
+                                </a>
+                            )}
                             
                             <div className="mb-4 mt-2">
                                 <span className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${
@@ -244,7 +273,7 @@ const Schemes: React.FC = () => {
                                 </span>
                             </div>
                             
-                            <h3 className="font-bold text-xl text-gray-900 mb-2 pr-8">{scheme.name}</h3>
+                            <h3 className="font-bold text-xl text-gray-900 mb-2 pr-12">{scheme.name}</h3>
                             <p className="text-gray-600 text-sm mb-4 line-clamp-2">{scheme.description}</p>
                             
                             {/* AI Reason */}
@@ -274,13 +303,128 @@ const Schemes: React.FC = () => {
                                 )}
                             </div>
 
-                            <button className="w-full py-2 border border-pink-600 text-pink-600 font-bold rounded-lg hover:bg-pink-50 transition-colors flex items-center justify-center gap-1">
-                                {t.check_eligibility} <ChevronRight size={16} />
-                            </button>
+                            <div className="flex gap-3">
+                                {/* AI Guide Button */}
+                                <button 
+                                    onClick={() => handleOpenGuide(scheme)}
+                                    className="flex-1 py-2 bg-pink-50 border border-pink-200 text-pink-700 font-bold rounded-lg hover:bg-pink-100 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <FileText size={16} /> {t.guide_me}
+                                </button>
+
+                                {/* Official Apply Button */}
+                                {scheme.link ? (
+                                    <a 
+                                        href={scheme.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 py-2 bg-pink-600 text-white font-bold rounded-lg hover:bg-pink-700 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        {t.apply_now} <ChevronRight size={16} />
+                                    </a>
+                                ) : (
+                                    <button disabled className="flex-1 py-2 bg-gray-100 text-gray-400 font-bold rounded-lg cursor-not-allowed">
+                                        Link Unavailable
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     );
                 })}
             </div>
+
+            {/* AI Application Guide Modal */}
+            {activeGuideScheme && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh]">
+                        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                    <Sparkles className="text-pink-600" size={20} /> {t.application_guide}
+                                </h2>
+                                <p className="text-sm text-gray-500 mt-1">{activeGuideScheme.name}</p>
+                            </div>
+                            <button onClick={() => setActiveGuideScheme(null)} className="p-1 hover:bg-gray-200 rounded-full text-gray-500">
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto custom-scrollbar">
+                            {isGuideLoading ? (
+                                <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                    <Loader2 className="animate-spin mb-4 text-pink-600" size={40} />
+                                    <p className="font-medium animate-pulse">{t.generating_guide}</p>
+                                </div>
+                            ) : guideData ? (
+                                <div className="space-y-6">
+                                    {/* Documents Section */}
+                                    <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                                        <h3 className="font-bold text-blue-900 mb-3 flex items-center gap-2">
+                                            <CheckSquare size={18} /> {t.documents_required}
+                                        </h3>
+                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            {guideData.documents.map((doc, idx) => (
+                                                <li key={idx} className="flex items-start gap-2 text-sm text-blue-800">
+                                                    <CheckCircle size={14} className="mt-0.5 shrink-0 text-blue-600" />
+                                                    {doc}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Steps Section */}
+                                    <div>
+                                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                            <ChevronRight className="bg-pink-100 text-pink-600 rounded-full p-0.5" size={20} /> 
+                                            {t.step_by_step}
+                                        </h3>
+                                        <div className="space-y-4 pl-2 border-l-2 border-pink-100 ml-2">
+                                            {guideData.steps.map((step, idx) => (
+                                                <div key={idx} className="relative pl-6">
+                                                    <div className="absolute -left-[9px] top-0 w-4 h-4 bg-pink-100 border-2 border-white rounded-full flex items-center justify-center">
+                                                        <div className="w-1.5 h-1.5 bg-pink-500 rounded-full"></div>
+                                                    </div>
+                                                    <p className="text-gray-700 text-sm leading-relaxed">
+                                                        <span className="font-bold text-gray-900 mr-2">Step {idx + 1}:</span>
+                                                        {step}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Tips Section */}
+                                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 flex gap-3">
+                                        <Lightbulb className="text-yellow-600 shrink-0" size={24} />
+                                        <div>
+                                            <h4 className="font-bold text-yellow-800 text-sm mb-1">{t.important_tips}</h4>
+                                            <p className="text-xs text-yellow-700 leading-relaxed">{guideData.tips}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-center text-red-500">Failed to load guide. Please try again.</p>
+                            )}
+                        </div>
+
+                        {/* Footer Action */}
+                        {!isGuideLoading && (
+                            <div className="p-5 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end">
+                                {activeGuideScheme.link && (
+                                    <a 
+                                        href={activeGuideScheme.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="bg-pink-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-pink-700 transition-colors flex items-center gap-2 shadow-md"
+                                    >
+                                        {t.visit_official_site} <ExternalLink size={16} />
+                                    </a>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -6,14 +6,51 @@ import { useLanguage } from '../contexts/LanguageContext';
 // --- DATA GENERATION UTILITIES ---
 const ANIMAL_TYPES = ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Chicken'];
 const BREEDS: Record<string, string[]> = {
-    'Cow': ['Gir', 'Sahiwal', 'Red Sindhi', 'Jersey', 'Holstein'],
-    'Buffalo': ['Murrah', 'Surti', 'Jaffrabadi', 'Mehsana'],
-    'Goat': ['Osmanabadi', 'Boer', 'Jamnapari', 'Sirohi'],
-    'Sheep': ['Deccani', 'Nellore', 'Marwari'],
-    'Chicken': ['Kadaknath', 'Rhode Island', 'Local']
+    'Cow': ['Gir', 'Sahiwal', 'Red Sindhi', 'Jersey', 'Holstein', 'Khillar'],
+    'Buffalo': ['Murrah', 'Surti', 'Jaffrabadi', 'Mehsana', 'Pandharpuri'],
+    'Goat': ['Osmanabadi', 'Boer', 'Jamnapari', 'Sirohi', 'Black Bengal'],
+    'Sheep': ['Deccani', 'Nellore', 'Marwari', 'Madras Red'],
+    'Chicken': ['Kadaknath', 'Rhode Island', 'Local', 'Vanaraja']
 };
 const DISTRICTS = ['Pune', 'Satara', 'Nashik', 'Ahmednagar', 'Solapur', 'Kolhapur', 'Sangli', 'Aurangabad', 'Nagpur', 'Amravati', 'Kottayam', 'Idukki', 'Ernakulam'];
-const SELLERS = ['Ramesh', 'Suresh', 'Mahesh', 'Ganesh', 'Vijay', 'Arjun', 'Joseph', 'Mathew', 'Abdullah', 'Raj'];
+const SELLERS = ['Ramesh', 'Suresh', 'Mahesh', 'Ganesh', 'Vijay', 'Arjun', 'Joseph', 'Mathew', 'Abdullah', 'Raj', 'Prakash', 'Sunil'];
+
+// High-quality, reliable Unsplash images
+const ANIMAL_IMAGES: Record<string, string[]> = {
+    'Cow': [
+        'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&q=80&w=600', // Holstein
+        'https://images.unsplash.com/photo-1527153857715-3908f2bae5e8?auto=format&fit=crop&q=80&w=600', // Brown
+        'https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&q=80&w=600', // Calf
+        'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=600', // General
+        'https://images.unsplash.com/photo-1596733430284-f7437764b1a9?auto=format&fit=crop&q=80&w=600'  // Indian style
+    ],
+    'Buffalo': [
+        'https://images.unsplash.com/photo-1504283562203-82f5b89a6326?auto=format&fit=crop&q=80&w=600', // Water buffalo
+        'https://plus.unsplash.com/premium_photo-1664302152990-575eb7f2d333?auto=format&fit=crop&q=80&w=600', // Close up
+        'https://images.unsplash.com/photo-1551884831-bbf3ddd77565?auto=format&fit=crop&q=80&w=600', // Dark cattle
+    ],
+    'Goat': [
+        'https://images.unsplash.com/photo-1524024973431-2ad916746881?auto=format&fit=crop&q=80&w=600', // White goat
+        'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&q=80&w=600', // Brown goat
+        'https://images.unsplash.com/photo-1513236709-b687c473c914?auto=format&fit=crop&q=80&w=600', // Baby goat
+        'https://images.unsplash.com/photo-1555662760-4927b5f16422?auto=format&fit=crop&q=80&w=600'  // Spotted
+    ],
+    'Sheep': [
+        'https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&q=80&w=600', // Grazing
+        'https://images.unsplash.com/photo-1511117833895-4b473de0b8fd?auto=format&fit=crop&q=80&w=600', // Close up
+        'https://images.unsplash.com/photo-1533318087102-b3f199333f1e?auto=format&fit=crop&q=80&w=600' // Flock
+    ],
+    'Chicken': [
+        'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&q=80&w=600', // Brown hen
+        'https://images.unsplash.com/photo-1563281577-a7be47e20db9?auto=format&fit=crop&q=80&w=600', // White hen
+        'https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?auto=format&fit=crop&q=80&w=600' // Rooster
+    ]
+};
+
+const getRandomImage = (type: string) => {
+    const images = ANIMAL_IMAGES[type] || ANIMAL_IMAGES['Cow'];
+    return images[Math.floor(Math.random() * images.length)];
+};
 
 const generateMockListings = (count: number): AnimalListing[] => {
     const listings: AnimalListing[] = [];
@@ -29,6 +66,7 @@ const generateMockListings = (count: number): AnimalListing[] => {
         if (type === 'Cow') basePrice = 40000;
         if (type === 'Buffalo') basePrice = 60000;
         if (type === 'Goat') basePrice = 12000;
+        if (type === 'Sheep') basePrice = 10000;
         if (type === 'Chicken') basePrice = 500;
 
         const price = Math.floor(basePrice + (Math.random() * basePrice * 0.5));
@@ -48,21 +86,10 @@ const generateMockListings = (count: number): AnimalListing[] => {
             sellerName: seller,
             contactNumber: '9876543210',
             datePosted: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0],
-            image: getPlaceholderImage(type)
+            image: getRandomImage(type)
         });
     }
     return listings;
-};
-
-const getPlaceholderImage = (type: string) => {
-    switch(type) {
-        case 'Cow': return 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?auto=format&fit=crop&q=80&w=600';
-        case 'Buffalo': return 'https://images.unsplash.com/photo-1504283562203-82f5b89a6326?auto=format&fit=crop&q=80&w=600';
-        case 'Goat': return 'https://images.unsplash.com/photo-1524024973431-2ad916746881?auto=format&fit=crop&q=80&w=600';
-        case 'Sheep': return 'https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&q=80&w=600';
-        case 'Chicken': return 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&q=80&w=600';
-        default: return 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&q=80&w=600';
-    }
 };
 
 const ITEMS_PER_PAGE = 12;
@@ -93,7 +120,7 @@ const AnimalMart: React.FC = () => {
         purpose: 'Milk',
         healthStatus: 'Good',
         vaccinated: true,
-        state: 'Kerala',
+        state: 'Maharashtra',
         district: '',
         price: 0,
         sellerName: 'Shardul Kolekar', 
@@ -101,20 +128,21 @@ const AnimalMart: React.FC = () => {
     });
 
     useEffect(() => {
-        const saved = localStorage.getItem('krishi_animal_listings_v2'); // New key for large dataset
+        // Changed key to v3 to force regenerate data with new images
+        const saved = localStorage.getItem('krishi_animal_listings_v3'); 
         if (saved) {
             setListings(JSON.parse(saved));
         } else {
             // Generate 1000 items
             const generated = generateMockListings(1000);
             setListings(generated);
-            localStorage.setItem('krishi_animal_listings_v2', JSON.stringify(generated));
+            localStorage.setItem('krishi_animal_listings_v3', JSON.stringify(generated));
         }
     }, []);
 
     const saveListings = (updated: AnimalListing[]) => {
         setListings(updated);
-        localStorage.setItem('krishi_animal_listings_v2', JSON.stringify(updated));
+        localStorage.setItem('krishi_animal_listings_v3', JSON.stringify(updated));
     };
 
     const handleSubmit = () => {
@@ -138,7 +166,7 @@ const AnimalMart: React.FC = () => {
             sellerName: formData.sellerName || 'Anonymous',
             contactNumber: formData.contactNumber || '',
             datePosted: new Date().toISOString().split('T')[0],
-            image: getPlaceholderImage(formData.type as string)
+            image: getRandomImage(formData.type as string)
         };
 
         saveListings([newListing, ...listings]);
@@ -317,7 +345,7 @@ const AnimalMart: React.FC = () => {
                     paginatedListings.map(item => (
                         <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all group flex flex-col h-full">
                             <div className="h-48 overflow-hidden relative">
-                                <img src={item.image || getPlaceholderImage(item.type)} alt={item.type} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                <img src={item.image || getRandomImage(item.type)} alt={item.type} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-gray-800 shadow-sm flex items-center gap-1">
                                     <Tag size={12} className="text-orange-500" /> {item.type}
                                 </div>

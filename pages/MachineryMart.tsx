@@ -1,74 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import { Tractor, Search, Filter, Plus, Phone, MessageCircle, MapPin, X, Tag, ShieldCheck, AlertTriangle, Flag } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Tractor, Search, Filter, Plus, Phone, MessageCircle, MapPin, X, Tag, ShieldCheck, AlertTriangle, Flag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MachineListing } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const MOCK_MACHINES: MachineListing[] = [
-    {
-        id: '1',
-        machineType: 'Tractor',
-        listingType: 'Rent',
-        brandModel: 'Mahindra 575 DI',
-        condition: 'Good',
-        year: '2019',
-        price: 800,
-        priceUnit: 'hour',
-        available: true,
-        state: 'Maharashtra',
-        district: 'Pune',
-        ownerName: 'Rajesh Kumar',
-        contactNumber: '9876543210',
-        verifiedOwner: true,
-        verifiedLocation: true,
-        image: 'https://images.unsplash.com/photo-1595246733230-e4d67389c922?auto=format&fit=crop&q=80&w=600',
-        datePosted: '2024-03-20'
-    },
-    {
-        id: '2',
-        machineType: 'Harvester',
-        listingType: 'Rent',
-        brandModel: 'Kubota Harvester',
-        condition: 'Good',
-        year: '2021',
-        price: 2500,
-        priceUnit: 'hour',
-        available: true,
-        state: 'Punjab',
-        district: 'Ludhiana',
-        ownerName: 'Simran Singh',
-        contactNumber: '9876543211',
-        verifiedOwner: true,
-        verifiedLocation: false,
-        image: 'https://images.unsplash.com/photo-1628062973977-96c342797441?auto=format&fit=crop&q=80&w=600',
-        datePosted: '2024-03-22'
-    },
-    {
-        id: '3',
-        machineType: 'Rotavator',
-        listingType: 'Sell',
-        brandModel: 'Shaktiman 6ft',
-        condition: 'Average',
-        year: '2018',
-        price: 45000,
-        priceUnit: 'flat',
-        available: true,
-        state: 'Kerala',
-        district: 'Kottayam',
-        ownerName: 'Mathew Thomas',
-        contactNumber: '9876543212',
-        verifiedOwner: false,
-        verifiedLocation: true,
-        image: 'https://plus.unsplash.com/premium_photo-1661962360334-a63907ebc792?auto=format&fit=crop&q=80&w=600',
-        datePosted: '2024-03-15'
+// --- DATA GENERATION CONSTANTS ---
+const MACHINE_TYPES = ['Tractor', 'Harvester', 'Rotavator', 'Sprayer', 'Pump', 'Tiller'];
+const BRANDS = ['Mahindra', 'John Deere', 'Kubota', 'Swaraj', 'Sonalika', 'New Holland', 'Massey Ferguson', 'Shaktiman'];
+const DISTRICTS = ['Pune', 'Satara', 'Nashik', 'Ahmednagar', 'Solapur', 'Kolhapur', 'Sangli', 'Aurangabad', 'Nagpur', 'Amravati', 'Kottayam', 'Idukki', 'Ernakulam'];
+const SELLERS = ['Rajesh', 'Suresh', 'Amit', 'Vijay', 'Rahul', 'Arjun', 'Joseph', 'Mathew', 'Abdullah', 'Vikram'];
+
+const getPlaceholderImage = (type: string) => {
+    switch(type) {
+        case 'Tractor': return 'https://images.unsplash.com/photo-1595246733230-e4d67389c922?auto=format&fit=crop&q=80&w=600';
+        case 'Harvester': return 'https://images.unsplash.com/photo-1628062973977-96c342797441?auto=format&fit=crop&q=80&w=600';
+        case 'Sprayer': return 'https://images.unsplash.com/photo-1615811361524-78891518f1f9?auto=format&fit=crop&q=80&w=600';
+        case 'Pump': return 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?auto=format&fit=crop&q=80&w=600';
+        default: return 'https://plus.unsplash.com/premium_photo-1661962360334-a63907ebc792?auto=format&fit=crop&q=80&w=600';
     }
-];
+};
+
+const generateMockMachines = (count: number): MachineListing[] => {
+    const listings: MachineListing[] = [];
+    for (let i = 1; i <= count; i++) {
+        const type = MACHINE_TYPES[Math.floor(Math.random() * MACHINE_TYPES.length)];
+        const brand = BRANDS[Math.floor(Math.random() * BRANDS.length)];
+        const district = DISTRICTS[Math.floor(Math.random() * DISTRICTS.length)];
+        const listingType = Math.random() > 0.6 ? 'Sell' : 'Rent'; // 60% Rent probability for Sell vs Rent balance
+        const seller = SELLERS[Math.floor(Math.random() * SELLERS.length)];
+        
+        let price = 0;
+        let unit: 'hour' | 'day' | 'flat' = 'flat';
+
+        if (listingType === 'Rent') {
+            price = Math.floor(Math.random() * 1000) + 400; // 400 - 1400 hourly
+            unit = Math.random() > 0.7 ? 'day' : 'hour';
+            if(unit === 'day') price *= 8; // approx 8 hours work
+        } else {
+            // Selling price
+            if (type === 'Tractor' || type === 'Harvester') {
+                 price = Math.floor(Math.random() * 500000) + 200000;
+            } else {
+                 price = Math.floor(Math.random() * 50000) + 15000;
+            }
+            unit = 'flat';
+        }
+
+        listings.push({
+            id: i.toString(),
+            machineType: type as any,
+            listingType: listingType,
+            brandModel: `${brand} ${type} ${Math.floor(Math.random() * 100)} Series`,
+            condition: Math.random() > 0.3 ? 'Good' : (Math.random() > 0.5 ? 'Average' : 'Old'),
+            year: (2015 + Math.floor(Math.random() * 9)).toString(),
+            price: Math.floor(price),
+            priceUnit: unit,
+            available: Math.random() > 0.1, // 90% available
+            state: district === 'Kottayam' || district === 'Idukki' || district === 'Ernakulam' ? 'Kerala' : 'Maharashtra',
+            district: district,
+            ownerName: seller,
+            contactNumber: '9876543210',
+            verifiedOwner: Math.random() > 0.2,
+            verifiedLocation: Math.random() > 0.3,
+            image: getPlaceholderImage(type),
+            datePosted: new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString().split('T')[0]
+        });
+    }
+    return listings;
+};
+
+const ITEMS_PER_PAGE = 12;
 
 const MachineryMart: React.FC = () => {
     const { t } = useLanguage();
     const [listings, setListings] = useState<MachineListing[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    // Filters
+    // Filters & Pagination
+    const [currentPage, setCurrentPage] = useState(1);
     const [filterType, setFilterType] = useState('All');
     const [listingTypeFilter, setListingTypeFilter] = useState('All');
     const [filterDistrict, setFilterDistrict] = useState('');
@@ -90,18 +98,19 @@ const MachineryMart: React.FC = () => {
     });
 
     useEffect(() => {
-        const saved = localStorage.getItem('krishi_machine_listings');
+        const saved = localStorage.getItem('krishi_machine_listings_v2');
         if (saved) {
             setListings(JSON.parse(saved));
         } else {
-            setListings(MOCK_MACHINES);
-            localStorage.setItem('krishi_machine_listings', JSON.stringify(MOCK_MACHINES));
+            const generated = generateMockMachines(100);
+            setListings(generated);
+            localStorage.setItem('krishi_machine_listings_v2', JSON.stringify(generated));
         }
     }, []);
 
     const saveListings = (updated: MachineListing[]) => {
         setListings(updated);
-        localStorage.setItem('krishi_machine_listings', JSON.stringify(updated));
+        localStorage.setItem('krishi_machine_listings_v2', JSON.stringify(updated));
     };
 
     const handleSubmit = () => {
@@ -135,21 +144,26 @@ const MachineryMart: React.FC = () => {
         setFormData({ ...formData, brandModel: '', price: 0, district: '' });
     };
 
-    const getPlaceholderImage = (type: string) => {
-        switch(type) {
-            case 'Tractor': return 'https://images.unsplash.com/photo-1595246733230-e4d67389c922?auto=format&fit=crop&q=80&w=600';
-            case 'Harvester': return 'https://images.unsplash.com/photo-1628062973977-96c342797441?auto=format&fit=crop&q=80&w=600';
-            case 'Sprayer': return 'https://images.unsplash.com/photo-1615811361524-78891518f1f9?auto=format&fit=crop&q=80&w=600';
-            default: return 'https://plus.unsplash.com/premium_photo-1661962360334-a63907ebc792?auto=format&fit=crop&q=80&w=600';
-        }
-    };
+    const filteredListings = useMemo(() => {
+        return listings.filter(item => {
+            const typeMatch = filterType === 'All' || item.machineType === filterType;
+            const listTypeMatch = listingTypeFilter === 'All' || item.listingType === listingTypeFilter;
+            const distMatch = item.district.toLowerCase().includes(filterDistrict.toLowerCase());
+            return typeMatch && listTypeMatch && distMatch;
+        });
+    }, [listings, filterType, listingTypeFilter, filterDistrict]);
 
-    const filteredListings = listings.filter(item => {
-        const typeMatch = filterType === 'All' || item.machineType === filterType;
-        const listTypeMatch = listingTypeFilter === 'All' || item.listingType === listingTypeFilter;
-        const distMatch = item.district.toLowerCase().includes(filterDistrict.toLowerCase());
-        return typeMatch && listTypeMatch && distMatch;
-    });
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
+    const paginatedListings = filteredListings.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    // Reset page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filterType, listingTypeFilter, filterDistrict]);
 
     const reportListing = (id: string) => {
         alert("Listing reported to admins for review.");
@@ -218,6 +232,7 @@ const MachineryMart: React.FC = () => {
                         <option value="Rotavator">Rotavator</option>
                         <option value="Sprayer">Sprayer</option>
                         <option value="Pump">Pump</option>
+                        <option value="Tiller">Power Tiller</option>
                     </select>
                 </div>
                 <div className="relative w-full md:w-64">
@@ -232,14 +247,24 @@ const MachineryMart: React.FC = () => {
                 </div>
             </div>
 
+            {/* Stats Row */}
+            <div className="flex justify-between items-center mb-4 px-2">
+                <p className="text-gray-500 text-sm">
+                    Showing <span className="font-bold text-gray-900">{paginatedListings.length}</span> of {filteredListings.length} machines
+                </p>
+                <p className="text-gray-500 text-sm">
+                   Page {currentPage} of {totalPages || 1}
+                </p>
+            </div>
+
             {/* Listings Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredListings.length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {paginatedListings.length === 0 ? (
                     <div className="col-span-full py-12 text-center text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
                         No machinery found matching your criteria.
                     </div>
                 ) : (
-                    filteredListings.map(item => (
+                    paginatedListings.map(item => (
                         <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all group flex flex-col h-full">
                             <div className="h-48 overflow-hidden relative">
                                 <img src={item.image} alt={item.machineType} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -321,6 +346,31 @@ const MachineryMart: React.FC = () => {
                     ))
                 )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-8 pb-8">
+                    <button 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    
+                    <span className="font-bold text-gray-700">
+                        Page {currentPage} of {totalPages}
+                    </span>
+
+                    <button 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <ChevronRight size={24} />
+                    </button>
+                </div>
+            )}
 
             {/* List Modal */}
             {isModalOpen && (

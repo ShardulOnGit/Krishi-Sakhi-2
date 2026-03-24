@@ -1,5 +1,6 @@
+
 import { GoogleGenAI } from "@google/genai";
-import { QuestVerificationResult, Scheme, WeatherData, Crop, ActivityLog, UserProfile, PeerFarmer, DiseaseAnalysis } from "../types";
+import { QuestVerificationResult, Scheme, WeatherData, Crop, ActivityLog, UserProfile, PeerFarmer, DiseaseAnalysis, ApplicationGuide } from "../types";
 
 const apiKey = process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
@@ -263,6 +264,42 @@ export const getSchemeRecommendations = async (userProfile: any, availableScheme
   } catch (error) {
     console.error("Scheme Recommendation Error:", error);
     return [];
+  }
+};
+
+export const generateSchemeApplicationGuide = async (schemeName: string, language: string = 'en'): Promise<ApplicationGuide> => {
+  try {
+    const prompt = `You are a Government Scheme Application Assistant.
+    
+    Provide a step-by-step guide on how to apply for the scheme: "${schemeName}" on the official Indian government website.
+    
+    Return a strict JSON object with the following structure:
+    {
+      "steps": ["Step 1...", "Step 2..."],
+      "documents": ["Document 1", "Document 2"],
+      "tips": "One short paragraph of crucial advice for filling the form correctly."
+    }
+
+    LANGUAGE INSTRUCTION: The content of the arrays and strings MUST be in ${language === 'hi' ? 'Hindi' : language === 'mr' ? 'Marathi' : 'English'}.
+    Do not use markdown. Just raw JSON.
+    `;
+
+    const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
+        config: {
+            responseMimeType: "application/json"
+        }
+    });
+
+    return JSON.parse(response.text || '{}');
+  } catch (error) {
+      console.error("Guide Gen Error:", error);
+      return {
+          steps: ["Visit the official website.", "Look for the registration link.", "Fill in your details."],
+          documents: ["Aadhar Card", "Land Documents", "Bank Passbook"],
+          tips: "Please consult your local agriculture office for more help."
+      };
   }
 };
 
